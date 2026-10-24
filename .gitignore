@@ -1,0 +1,14 @@
+# Never keep any private key backups or GnuPG home directories in this repository.
+.gnupg/
+.idea/
+*.key
+*.kbx
+*.sks
+*.gpg~
+*.asc~
+*.bak
+*.backup
+*private*
+*secret*
+secring.*
+private-keys-v1.d/
