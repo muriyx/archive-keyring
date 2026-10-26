@@ -12,3 +12,5 @@
 *secret*
 secring.*
 private-keys-v1.d/
+_site/
+__pycache__/
