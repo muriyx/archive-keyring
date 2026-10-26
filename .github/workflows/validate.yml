@@ -1,8 +1,9 @@
-name: Validate public keyrings
+name: Validate and publish public keyrings
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,3 +16,36 @@ jobs:
       - name: Validate public OpenPGP keyrings
         shell: bash
         run: bash scripts/verify-keyrings.sh
+
+  build:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+        -   uses: actions/checkout@v4
+        -   name: Build public key download page
+            run: python3 scripts/build-pages.py
+        -   name: Upload GitHub Pages artifact
+            uses: actions/upload-pages-artifact@v3
+            with:
+                path: _site
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
